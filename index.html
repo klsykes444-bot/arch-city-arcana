@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arch City Arcana</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e8e4d8;min-height:100vh}
+#app{max-width:700px;margin:0 auto;padding:1.5rem}
+.btn{border-radius:8px;padding:.5rem 1.25rem;font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s;border:none}
+.btn-gold{background:#BA7517;color:#fff}
+.btn-gold:hover{background:#854F0B}
+.btn-ghost{background:rgba(255,255,255,.07);border:0.5px solid rgba(255,255,255,.2);color:#e8e4d8}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.card-slot{width:88px;height:144px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;position:relative;transition:transform .2s}
+.card-back{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.15);cursor:pointer}
+.card-back:hover{transform:translateY(-6px);border-color:rgba(186,117,23,.6)}
+.card-front{background:rgba(255,255,255,.04);border:0.5px solid rgba(255,255,255,.12)}
+.pos-lbl{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;text-align:center}
+.card-sym{font-size:18px;margin-bottom:4px}
+.card-nm{font-size:10px;font-weight:500;color:#e8e4d8;line-height:1.3;margin-bottom:3px}
+.card-tag{font-size:9px;padding:2px 6px;border-radius:4px}
+.card-kw{font-size:9px;color:rgba(255,255,255,.4);margin-top:3px;line-height:1.3}
+.spread-card{background:rgba(255,255,255,.05);border:0.5px solid rgba(255,255,255,.12);border-radius:12px;padding:1rem 1.15rem;cursor:pointer;transition:border-color .2s}
+.spread-card:hover{border-color:rgba(186,117,23,.6);background:rgba(186,117,23,.06)}
+.detail-row{background:rgba(255,255,255,.04);border:0.5px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.1rem;display:flex;gap:12px;margin-bottom:10px}
+.oracle-box{background:rgba(255,255,255,.04);border:0.5px solid rgba(186,117,23,.3);border-radius:12px;padding:1.25rem}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CARDS=[
+  {id:1,name:"Mojo",arcana:"Character",element:"Earth",zodiac:"Taurus",meaning:"Governance, spiritual authority, ancestral alignment",desc:"A long-lived AfroMystic whose leadership anchors Ritual House. He governs the metaphysical order with patience, depth, and ancient clarity.",sym:"🜁"},
+  {id:2,name:"Doctor Hoodoo",arcana:"Character",element:"Fire",zodiac:"Aries",meaning:"Protection, magical defense, righteous intervention",desc:"A protector forged in the 1800s. His Skull Staff channels ancestral fire to shield the vulnerable and confront threats head-on.",sym:"🜁"},
+  {id:3,name:"Blak Magik",arcana:"Character",element:"Air",zodiac:"Gemini",meaning:"Confronting shadow, fearless pursuit, necessary danger",desc:"Ritual House's primary hunter of Darkness. He tracks, engages, and neutralizes forces that thrive in the unseen.",sym:"🜁"},
+  {id:4,name:"Juju",arcana:"Character",element:"Water",zodiac:"Pisces",meaning:"High-level conjure, dimensional craft, spirit negotiation",desc:"A master conjurer whose bond with the N'gaNomikon grants access to forbidden pathways and ancient spirits.",sym:"🜁"},
+  {id:5,name:"Sun Sirius",arcana:"Character",element:"Fire",zodiac:"Leo",meaning:"Illumination, clarity, radiant purpose",desc:"His Winged Shoes carry him between realms of light and cosmic order. He reveals truth through brilliance.",sym:"🜁"},
+  {id:6,name:"Ms Angel",arcana:"Character",element:"Air",zodiac:"Libra",meaning:"Purity, divine clarity, protective grace",desc:"A crystalline guardian whose wings refract truth and shield the righteous.",sym:"🜁"},
+  {id:7,name:"NylaHotep",arcana:"Character",element:"Aether",zodiac:"Scorpio",meaning:"Duality, cosmic memory, shadow-light integration",desc:"Born under a double eclipse, she manipulates gravity, intention, and fate.",sym:"🜁"},
+  {id:8,name:"Kish",arcana:"Character",element:"Air",zodiac:"Virgo",meaning:"Instinct, ferocity, shapeshifting",desc:"A warrior who can slip into a feral hyena form when pushed. Her instincts cut through deception.",sym:"🜁"},
+  {id:9,name:"Behemoth",arcana:"Character",element:"Earth",zodiac:"Capricorn",meaning:"Pressure, immovability, overwhelming force",desc:"His presence bends space and forces truth to surface.",sym:"🜁"},
+  {id:10,name:"Papa Borne",arcana:"Character",element:"Water",zodiac:"Cancer",meaning:"Legacy, generational power, ancestral duty",desc:"Patriarch of the Borne family. His influence runs through blood, oath, and history.",sym:"🜁"},
+  {id:11,name:"Gol Gotha",arcana:"Character",element:"Earth",zodiac:"Scorpio",meaning:"Containment, suppressed power, karmic reckoning",desc:"Once a cosmic warlord, now bound in confinement. His dormant power radiates like a caged star.",sym:"🜁"},
+  {id:12,name:"Arch City",arcana:"Location",element:"Air",zodiac:"Gemini",meaning:"Convergence, community, crossroads",desc:"A metropolis built on ley lines, humming with layered histories.",sym:"🜄"},
+  {id:13,name:"Sirius",arcana:"Location",element:"Fire",zodiac:"Leo",meaning:"Ascension, clarity, cosmic alignment",desc:"A star-temple where light becomes language and destiny.",sym:"🜄"},
+  {id:14,name:"The Bottoms",arcana:"Location",element:"Water",zodiac:"Scorpio",meaning:"Shadow work, survival, buried truth",desc:"A district where the past clings like humidity and memory.",sym:"🜄"},
+  {id:15,name:"The Liminal Zones",arcana:"Location",element:"Aether",zodiac:"Pisces",meaning:"Transition, portals, uncertainty",desc:"Spaces where reality thins and choices echo.",sym:"🜄"},
+  {id:16,name:"New Leveau",arcana:"Location",element:"Earth",zodiac:"Taurus",meaning:"Culture, magic, community wisdom",desc:"A district of rootworkers, griots, and spirit-markets.",sym:"🜄"},
+  {id:17,name:"The Cursed Tower",arcana:"Location",element:"Air",zodiac:"Aquarius",meaning:"Warning, corruption, danger",desc:"A structure warped by failed rituals and lingering spirits.",sym:"🜄"},
+  {id:18,name:"The Khaos Zone",arcana:"Location",element:"Fire",zodiac:"Aries",meaning:"Disruption, mutation, raw potential",desc:"A region where reality glitches and magic mutates.",sym:"🜄"},
+  {id:19,name:"Neptune's Temples",arcana:"Location",element:"Water",zodiac:"Pisces",meaning:"Healing, intuition, emotional depth",desc:"Submerged temples where the water itself remembers.",sym:"🜄"},
+  {id:20,name:"The Black Whole",arcana:"Location",element:"Aether",zodiac:"Scorpio",meaning:"Ego death, surrender, endings",desc:"A gravitational wound that consumes what must be released.",sym:"🜄"},
+  {id:21,name:"The Markets",arcana:"Location",element:"Air",zodiac:"Libra",meaning:"Opportunity, negotiation, choice",desc:"A bazaar where blessings, curses, and futures are traded.",sym:"🜄"},
+  {id:22,name:"The Ritual House",arcana:"Location",element:"Earth",zodiac:"Capricorn",meaning:"Mastery, lineage, initiation",desc:"The spiritual headquarters anchoring Arch City's magic.",sym:"🜄"},
+  {id:23,name:"The N'gaNomikon",arcana:"Relic",element:"Water",zodiac:"Scorpio",meaning:"Forbidden knowledge, shadow wisdom",desc:"A living text that whispers truths meant for the brave.",sym:"🜃"},
+  {id:24,name:"The Ankh'Nomikon",arcana:"Relic",element:"Fire",zodiac:"Leo",meaning:"Life force, resurrection, sacred lineage",desc:"A breathing book of cosmic vitality.",sym:"🜃"},
+  {id:25,name:"Mojo's Staff",arcana:"Relic",element:"Earth",zodiac:"Taurus",meaning:"Stability, grounding, ritual authority",desc:"A staff carved from the roots of the world.",sym:"🜃"},
+  {id:26,name:"Doctor Hoodoo's Skull Staff",arcana:"Relic",element:"Fire",zodiac:"Aries",meaning:"Ancestral fire, righteous judgment",desc:"A conduit for the voices of the dead.",sym:"🜃"},
+  {id:27,name:"Sun Sirius' Winged Shoes",arcana:"Relic",element:"Air",zodiac:"Sagittarius",meaning:"Movement, ascension, divine speed",desc:"Shoes that carry him across realms.",sym:"🜃"},
+  {id:28,name:"Juju's Hoodoo Sacks",arcana:"Relic",element:"Water",zodiac:"Cancer",meaning:"Conjure, spirit-work, hidden solutions",desc:"Each sack holds a spirit, a secret, or a spell.",sym:"🜃"},
+  {id:29,name:"The Living Water",arcana:"Relic",element:"Water",zodiac:"Cancer",meaning:"Healing, purification, emotional renewal",desc:"Water that responds to intention.",sym:"🜃"},
+  {id:30,name:"The Codex Cube",arcana:"Relic",element:"Aether",zodiac:"Aquarius",meaning:"Training, discipline, tactical mastery",desc:"A multidimensional combat simulator that reshapes itself to challenge the user.",sym:"🜃"},
+  {id:31,name:"The Bone Crown",arcana:"Relic",element:"Earth",zodiac:"Capricorn",meaning:"Authority earned through sacrifice",desc:"A crown that forms only for the worthy.",sym:"🜃"},
+  {id:32,name:"The Red Sigil",arcana:"Relic",element:"Fire",zodiac:"Aries",meaning:"Activation, ignition, power surge",desc:"A glyph that awakens dormant potential.",sym:"🜃"},
+  {id:33,name:"The Mirror of the Many",arcana:"Relic",element:"Air",zodiac:"Libra",meaning:"Identity, reflection, multiplicity",desc:"A mirror that shows every version of you.",sym:"🜃"},
+  {id:34,name:"The Gangs of Arch City",arcana:"Faction",element:"Fire",zodiac:"Aries",meaning:"Territory, conflict, shifting alliances",desc:"Street factions shaping the city's pulse.",sym:"🜂"},
+  {id:35,name:"The Angelic Order",arcana:"Faction",element:"Air",zodiac:"Virgo",meaning:"Guidance, protection, divine structure",desc:"A celestial hierarchy watching Arch City.",sym:"🜂"},
+  {id:36,name:"The Wraiths",arcana:"Faction",element:"Water",zodiac:"Scorpio",meaning:"Hidden threats, spiritual interference",desc:"Ghostlike entities feeding on fear and memory.",sym:"🜂"},
+  {id:37,name:"The Hellaphants",arcana:"Faction",element:"Earth",zodiac:"Taurus",meaning:"Overwhelm, unstoppable force",desc:"Massive infernal beasts that trample boundaries.",sym:"🜂"},
+  {id:38,name:"The Borne Family",arcana:"Faction",element:"Water",zodiac:"Cancer",meaning:"Bloodline, loyalty, legacy",desc:"A dynasty with deep roots in Arch City's history.",sym:"🜂"},
+  {id:39,name:"The Tri-Axis",arcana:"Faction",element:"Aether",zodiac:"Sagittarius",meaning:"Balance, governance, cosmic-political order",desc:"Three great powers whose alignment shapes the fate of Arch City and the metaphysical world.",sym:"🜂"},
+  {id:40,name:"The Ritual House Circle",arcana:"Faction",element:"Earth",zodiac:"Capricorn",meaning:"Community, shared magic, collective strength",desc:"The inner circle maintaining the city's spiritual grid.",sym:"🜂"},
+  {id:41,name:"F.O.F.",arcana:"Faction",element:"Air",zodiac:"Capricorn",meaning:"Corruption, exploitation, systemic pressure",desc:"A crooked financial organization manipulating Arch City from behind the scenes.",sym:"🜂"},
+  {id:42,name:"The Bone Choir",arcana:"Faction",element:"Earth",zodiac:"Scorpio",meaning:"Ancestral voices, guidance from the dead",desc:"Spirits who sing truths into the living world.",sym:"🜂"},
+  {id:43,name:"The Market Brokers",arcana:"Faction",element:"Air",zodiac:"Libra",meaning:"Deals, negotiation, spiritual commerce",desc:"Traders who deal in blessings, curses, and futures.",sym:"🜂"},
+  {id:44,name:"The Khaos Children",arcana:"Faction",element:"Aether",zodiac:"Gemini",meaning:"Mutation, unpredictability, wild magic",desc:"Beings shaped by the Khaos Zone's unstable energies.",sym:"🜂"},
+  {id:45,name:"SupaNatural",arcana:"Triumvirate",element:"Fire",zodiac:"Leo",meaning:"Threshold, ascension, earned power",desc:"A cosmic warrior whose presence opens gateways of transformation.",sym:"★"},
+  {id:46,name:"D'Ed",arcana:"Triumvirate",element:"Shadow",zodiac:"Pluto",meaning:"Undoing, reversal, shadow alchemy",desc:"A quiet force who unravels curses, contracts, and destinies gone wrong.",sym:"★"},
+  {id:47,name:"Shade",arcana:"Triumvirate",element:"Air",zodiac:"Virgo",meaning:"Stealth, precision, unseen movement",desc:"A ghost-step assassin whose strikes rewrite outcomes.",sym:"★"},
+  {id:48,name:"The Elder Council",arcana:"Cosmic",element:"Aether",zodiac:"Capricorn",meaning:"Guidance, ancestral oversight, higher judgment",desc:"The governing body of ancient spirits who oversee the balance of all realms.",sym:"∞"},
+  {id:49,name:"The Living Axis",arcana:"Cosmic",element:"Aether",zodiac:"Capricorn",meaning:"Alignment, destiny pivot, structural truth",desc:"The cosmic spine connecting all worlds, all choices, all timelines.",sym:"∞"},
+];
+const ARCANA_FILL={Character:"#26215C",Location:"#04342C",Relic:"#412402",Faction:"#4A1B0C",Triumvirate:"#4B1528",Cosmic:"#042C53"};
+const ARCANA_TEXT={Character:"#CECBF6",Location:"#9FE1CB",Relic:"#FAC775",Faction:"#F5C4B3",Triumvirate:"#F4C0D1",Cosmic:"#B5D4F4"};
+const SPREADS=[
+  {name:"The Oracle's Word",count:1,positions:["Your Message"],desc:"One card — direct guidance for this moment"},
+  {name:"The Three Roads",count:3,positions:["Past","Present","Future"],desc:"What shaped you, where you stand, where you're headed"},
+  {name:"The Arch City Cross",count:5,positions:["Center Spirit","What Challenges","What Grounds","What Passes","What Arrives"],desc:"Five forces defining your current chapter"},
+  {name:"The Full Circle",count:7,positions:["Self","Home","Work","Love","The Obstacle","The Guide","The Outcome"],desc:"A complete reading across life's seven domains"},
+];
+let S={screen:"intro",spread:null,cards:[],revealed:[],reading:"",loading:false};
+function draw(n){return [...CARDS].sort(()=>Math.random()-.5).slice(0,n);}
+function af(a){return ARCANA_FILL[a]||"#1a1a2e";}
+function at(a){return ARCANA_TEXT[a]||"#e8e4d8";}
+function go(u){S={...S,...u};render();}
+async function getReading(){
+  go({loading:true});
+  const {spread,cards}=S;
+  const lines=cards.map((c,i)=>`Position ${i+1} — "${spread.positions[i]}": ${c.name} (${c.arcana} Arcana)\nMeaning: ${c.meaning}\nDescription: ${c.desc}`).join("\n\n");
+  const prompt=`You are the Oracle of Arch City — an AfroMystic divination guide for a 49-card oracle deck rooted in an urban-fantasy world of cosmic warriors, ancestral spirits, haunted districts, and living relics.\n\nThe seeker has drawn the following cards in the "${spread.name}" spread:\n\n${lines}\n\nDeliver a flowing, poetic reading that:\n- Weaves all cards into one coherent narrative message\n- Speaks directly to the seeker with ancestral warmth and spiritual power\n- Honors each card's position meaning\n- Offers grounded, actionable guidance\n\nWrite as the Oracle — alive, vivid, and deeply rooted. No mechanical card-by-card lists.`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const reading=d.content?.[0]?.text||"The Oracle is silent. Try again.";
+    go({loading:false,reading,screen:"result"});
+  }catch(e){
+    go({loading:false,reading:"The Oracle could not connect. Please try again.",screen:"result"});
+  }
+}
+function render(){
+  const app=document.getElementById("app");
+  const {screen}=S;
+  if(screen==="intro") app.innerHTML=renderIntro();
+  else if(screen==="spreads") app.innerHTML=renderSpreads();
+  else if(screen==="reading") app.innerHTML=renderReading();
+  else if(screen==="result") app.innerHTML=renderResult();
+  document.querySelectorAll("[data-a]").forEach(el=>{
+    el.onclick=()=>{
+      const a=el.dataset.a,v=el.dataset.v;
+      if(a==="start") go({screen:"spreads"});
+      else if(a==="pick") go({screen:"reading",spread:SPREADS[+v],cards:draw(SPREADS[+v].count),revealed:[],reading:"",loading:false});
+      else if(a==="reveal"){const r=[...S.revealed];if(!r.includes(+v))r.push(+v);go({revealed:r});}
+      else if(a==="revealall") go({revealed:S.cards.map((_,i)=>i)});
+      else if(a==="read") getReading();
+      else if(a==="reset") go({screen:"intro",spread:null,cards:[],revealed:[],reading:"",loading:false});
+      else if(a==="back") go({screen:"spreads"});
+    };
+  });
+}
+function renderIntro(){
+  return`<div style="text-align:center;padding:3rem 1rem">
+  <div style="font-size:32px;letter-spacing:.15em;margin-bottom:.75rem;opacity:.7">★ 🜁 ∞ 🜄 ★</div>
+  <h1 style="font-size:26px;font-weight:500;letter-spacing:.15em;color:#e8e4d8;margin-bottom:.4rem">ARCH CITY ARCANA</h1>
+  <p style="font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-bottom:.25rem">49 CARDS · 6 ARCANA · ONE ORACLE</p>
+  <p style="font-size:14px;color:rgba(255,255,255,.55);max-width:400px;margin:1.25rem auto 2.25rem;line-height:1.9">Characters, Locations, Relics, Factions, Triumvirates, and Cosmic forces — drawn fresh for your reading.</p>
+  <button data-a="start" class="btn btn-gold" style="font-size:15px;padding:.7rem 2.5rem;letter-spacing:.06em">Begin Reading</button>
+  <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:2rem">Tap each card to reveal · Your images will appear here once added</p>
+</div>`;}
+function renderSpreads(){
+  const opts=SPREADS.map((s,i)=>`
+  <div data-a="pick" data-v="${i}" class="spread-card">
+    <div style="font-size:16px;font-weight:500;color:#e8e4d8;margin-bottom:.3rem">${s.name}</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.5rem">${s.desc}</div>
+    <div style="font-size:12px;color:rgba(186,117,23,.8)">${s.count} card${s.count>1?"s":""} · ${s.positions.join(" / ")}</div>
+  </div>`).join("");
+  return`<div>
+  <div style="font-size:20px;font-weight:500;color:#e8e4d8;margin-bottom:1rem">Choose a Spread</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">${opts}</div>
+  <p style="font-size:12px;color:rgba(255,255,255,.25);margin-top:1rem">Your custom spread layouts will be added here</p>
+</div>`;}
+function renderReading(){
+  const {spread,cards,revealed,loading}=S;
+  const allDone=revealed.length===cards.length;
+  const cardEls=cards.map((c,i)=>{
+    const rev=revealed.includes(i);
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div class="pos-lbl">${spread.positions[i]}</div>
+      ${rev?`<div class="card-slot card-front">
+        <div class="card-sym">${c.sym}</div>
+        <div class="card-nm">${c.name}</div>
+        <div class="card-tag" style="background:${af(c.arcana)};color:${at(c.arcana)}">${c.arcana}</div>
+        <div class="card-kw">${c.meaning.split(",")[0]}</div>
+      </div>`:`<div data-a="reveal" data-v="${i}" class="card-slot card-back">
+        <div style="font-size:22px;opacity:.25">★</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:6px">tap to reveal</div>
+      </div>`}
+    </div>`;
+  }).join("");
+  const detailEls=cards.filter((_,i)=>revealed.includes(i)).map(c=>`
+  <div class="detail-row">
+    <div style="min-width:48px;text-align:center">
+      <div style="font-size:20px">${c.sym}</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:4px">${c.element}</div>
+    </div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.25rem;flex-wrap:wrap">
+        <span style="font-size:14px;font-weight:500;color:#e8e4d8">${c.name}</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${af(c.arcana)};color:${at(c.arcana)}">${c.arcana} · ${c.zodiac}</span>
+      </div>
+      <div style="font-size:12px;font-weight:500;color:rgba(186,117,23,.9);margin-bottom:.25rem">${c.meaning}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.7">${c.desc}</div>
+    </div>
+  </div>`).join("");
+  const actions=allDone?`<div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:center;flex-wrap:wrap">
+    ${loading?`<span style="font-size:14px;color:rgba(255,255,255,.4);padding:.5rem">The Oracle is reading the cards...</span>`:`
+    <button data-a="read" class="btn btn-gold">Receive the Oracle's Reading</button>
+    <button data-a="reset" class="btn btn-ghost">Start Over</button>`}
+  </div>`:`<div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:center">
+    <button data-a="revealall" class="btn btn-ghost" style="font-size:13px">Reveal All Cards</button>
+  </div>`;
+  return`<div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:18px;font-weight:500;color:#e8e4d8">${spread.name}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4)">${revealed.length} of ${cards.length} revealed</div>
+    </div>
+    <button data-a="back" class="btn btn-ghost" style="font-size:13px">← Spreads</button>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:.5rem">${cardEls}</div>
+  ${actions}
+  ${detailEls?`<div style="margin-top:1.25rem">${detailEls}</div>`:""}
+</div>`;}
+function renderResult(){
+  const {cards,reading}=S;
+  const chips=cards.map(c=>`<span style="font-size:11px;padding:2px 9px;border-radius:4px;background:${af(c.arcana)};color:${at(c.arcana)};margin:2px;display:inline-block">${c.name}</span>`).join("");
+  return`<div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div style="font-size:18px;font-weight:500;color:#e8e4d8">The Oracle Speaks</div>
+    <button data-a="reset" class="btn btn-ghost" style="font-size:13px">New Reading</button>
+  </div>
+  <div style="margin-bottom:1rem;line-height:2">${chips}</div>
+  <div class="oracle-box">
+    <div style="font-size:15px;line-height:1.9;color:rgba(255,255,255,.8);white-space:pre-wrap">${reading}</div>
+  </div>
+  <div style="margin-top:1.25rem;display:flex;gap:10px;flex-wrap:wrap">
+    <button data-a="reset" class="btn btn-gold">New Reading</button>
+    <button data-a="back" class="btn btn-ghost">Change Spread</button>
+  </div>
+</div>`;}
+render();
+</script>
+</body>
+</html>
